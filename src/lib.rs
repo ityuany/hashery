@@ -1,7 +1,6 @@
 use std::{fmt::LowerHex, path::Path};
 
-use digest::Output;
-use md5::Digest;
+use digest::{Digest, Output};
 use typed_builder::TypedBuilder;
 
 #[derive(Debug, Clone, Copy)]
@@ -63,7 +62,7 @@ impl Hashery {
 
     let mut file = tokio::fs::File::open(path).await?;
     let mut hasher = D::new();
-    let mut buffer = vec![0; 1024 * 1024];
+    let mut buffer = vec![0; self.buffer_size];
 
     loop {
       let n = file.read(&mut buffer).await?;
