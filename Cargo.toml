@@ -1,7 +1,13 @@
 [package]
-edition = "2024"
-name    = "hashery"
-version = "0.0.1"
+authors     = ["ityuany <519495771@qq.com>"]
+categories  = ["cryptography", "asynchronous", "filesystem"]
+description = "A flexible and efficient async file hashing library supporting multiple hash algorithms (MD5, SHA1, SHA2, SHA3, BLAKE2, BLAKE3)."
+edition     = "2024"
+include     = ["src/**/*.rs", "Cargo.toml", "LICENSE", "README.md", "README-zh_CN.md"]
+keywords    = ["hash", "crypto", "async", "checksum", "digest"]
+license     = "MIT"
+name        = "hashery"
+version     = "0.0.1"
 
 [features]
 default = ["md5", "sha1", "sha2", "sha3", "blake2", "blake3"] # 开发时默认启用所有算法
