@@ -42,6 +42,7 @@ hashery = { version = "0.1", features = ["sha2", "blake3"] }
 - `blake3` - 启用 BLAKE3
 
 特性组合：
+
 - `full` - 启用所有支持的算法
 - `modern` - 启用现代算法（SHA2 和 BLAKE3）
 
@@ -61,7 +62,7 @@ async fn main() -> std::io::Result<String> {
     // 计算文件哈希
     let hash = hashery.digest("path/to/file").await?;
     println!("文件哈希值: {}", hash);
-    
+
     Ok(())
 }
 ```
@@ -92,4 +93,20 @@ let hashery = Hashery::builder()
 
 ## 贡献
 
-欢迎贡献！请随时提交 Pull Request。 
+欢迎贡献！请随时提交 Pull Request。
+
+## 字节和字符串哈希
+
+你也可以直接对字节切片或字符串进行哈希：
+
+```rust
+let hashery = Hashery::builder().algorithm(Algorithm::SHA256).build();
+
+// 哈希字节切片
+let hash = hashery.digest_bytes(b"hello world").unwrap();
+println!("SHA256: {}", hash);
+
+// 哈希字符串
+let hash = hashery.digest_str("hello world").unwrap();
+println!("SHA256: {}", hash);
+```

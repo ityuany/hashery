@@ -42,6 +42,7 @@ hashery = { version = "0.1", features = ["sha2", "blake3"] }
 - `blake3` - Enable BLAKE3
 
 Feature groups:
+
 - `full` - Enable all supported algorithms
 - `modern` - Enable modern algorithms (SHA2 and BLAKE3)
 
@@ -61,35 +62,31 @@ async fn main() -> std::io::Result<String> {
     // Calculate file hash
     let hash = hashery.digest("path/to/file").await?;
     println!("File hash: {}", hash);
-    
+
     Ok(())
 }
+```
+
+## Hashing Bytes and Strings
+
+You can also hash bytes or strings directly:
+
+```rust
+let hashery = Hashery::builder().algorithm(Algorithm::SHA256).build();
+
+// Hash a byte slice
+env let hash = hashery.digest_bytes(b"hello world").unwrap();
+println!("SHA256: {}", hash);
+
+// Hash a string
+let hash = hashery.digest_str("hello world").unwrap();
+println!("SHA256: {}", hash);
 ```
 
 ## Examples
 
 Using different algorithms:
 
-```rust
-// SHA256 (requires "sha2" feature)
-let hashery = Hashery::builder()
-    .algorithm(Algorithm::SHA256)
-    .build();
-
-// BLAKE3 (requires "blake3" feature)
-let hashery = Hashery::builder()
-    .algorithm(Algorithm::Blake3)
-    .build();
 ```
 
-## Performance
-
-The library uses asynchronous I/O and configurable buffer sizes for optimal performance. Default buffer size is 1MB, which can be adjusted based on your needs.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. 
+```
