@@ -7,7 +7,7 @@ include     = ["src/**/*.rs", "Cargo.toml", "LICENSE", "README.md", "README-zh_C
 keywords    = ["hash", "crypto", "async", "checksum", "digest"]
 license     = "MIT"
 name        = "hashery"
-version     = "0.0.1"
+version     = "0.0.2"
 
 [features]
 default = ["sha2", "sha3"]
