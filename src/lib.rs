@@ -34,27 +34,73 @@ impl Hashery {
   pub async fn digest<P: AsRef<Path>>(&self, path: P) -> Result<String, std::io::Error> {
     let hash = match self.algorithm {
       #[cfg(feature = "md5")]
-      Algorithm::MD5 => self.make_digest::<md5::Md5, P>(path).await?,
+      Algorithm::MD5 => self.make_digest_file::<md5::Md5, P>(path).await?,
       #[cfg(feature = "sha1")]
-      Algorithm::SHA1 => self.make_digest::<sha1::Sha1, P>(path).await?,
+      Algorithm::SHA1 => self.make_digest_file::<sha1::Sha1, P>(path).await?,
       #[cfg(feature = "sha2")]
-      Algorithm::SHA256 => self.make_digest::<sha2::Sha256, P>(path).await?,
+      Algorithm::SHA256 => self.make_digest_file::<sha2::Sha256, P>(path).await?,
       #[cfg(feature = "sha2")]
-      Algorithm::SHA512 => self.make_digest::<sha2::Sha512, P>(path).await?,
+      Algorithm::SHA512 => self.make_digest_file::<sha2::Sha512, P>(path).await?,
       #[cfg(feature = "sha3")]
-      Algorithm::SHA3_256 => self.make_digest::<sha3::Sha3_256, P>(path).await?,
+      Algorithm::SHA3_256 => self.make_digest_file::<sha3::Sha3_256, P>(path).await?,
       #[cfg(feature = "blake2")]
-      Algorithm::Blake2b => self.make_digest::<blake2::Blake2b512, P>(path).await?,
+      Algorithm::Blake2b => self.make_digest_file::<blake2::Blake2b512, P>(path).await?,
       #[cfg(feature = "blake2")]
-      Algorithm::Blake2s => self.make_digest::<blake2::Blake2s256, P>(path).await?,
+      Algorithm::Blake2s => self.make_digest_file::<blake2::Blake2s256, P>(path).await?,
       #[cfg(feature = "blake3")]
-      Algorithm::Blake3 => self.make_blake3(path).await?,
+      Algorithm::Blake3 => self.make_blake3_file(path).await?,
     };
 
     Ok(hash)
   }
 
-  async fn make_digest<D: Digest, P: AsRef<Path>>(&self, path: P) -> Result<String, std::io::Error>
+  pub fn digest_string(&self, s: &str) -> Result<String, std::io::Error> {
+    self.digest_bytes(s.as_bytes())
+  }
+
+  pub fn digest_bytes(&self, bytes: &[u8]) -> Result<String, std::io::Error> {
+    let hash = match self.algorithm {
+      #[cfg(feature = "md5")]
+      Algorithm::MD5 => self.make_digest_bytes::<md5::Md5>(bytes)?,
+      #[cfg(feature = "sha1")]
+      Algorithm::SHA1 => self.make_digest_bytes::<sha1::Sha1>(bytes)?,
+      #[cfg(feature = "sha2")]
+      Algorithm::SHA256 => self.make_digest_bytes::<sha2::Sha256>(bytes)?,
+      #[cfg(feature = "sha2")]
+      Algorithm::SHA512 => self.make_digest_bytes::<sha2::Sha512>(bytes)?,
+      #[cfg(feature = "sha3")]
+      Algorithm::SHA3_256 => self.make_digest_bytes::<sha3::Sha3_256>(bytes)?,
+      #[cfg(feature = "blake2")]
+      Algorithm::Blake2b => self.make_digest_bytes::<blake2::Blake2b512>(bytes)?,
+      #[cfg(feature = "blake2")]
+      Algorithm::Blake2s => self.make_digest_bytes::<blake2::Blake2s256>(bytes)?,
+      #[cfg(feature = "blake3")]
+      Algorithm::Blake3 => self.make_blake3_bytes(bytes)?,
+    };
+
+    Ok(hash)
+  }
+
+  fn make_digest_bytes<D: Digest>(&self, bytes: &[u8]) -> Result<String, std::io::Error>
+  where
+    Output<D>: LowerHex,
+  {
+    let mut hasher = D::new();
+    hasher.update(bytes);
+    Ok(format!("{:x}", hasher.finalize()))
+  }
+
+  #[cfg(feature = "blake3")]
+  fn make_blake3_bytes(&self, bytes: &[u8]) -> Result<String, std::io::Error> {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(bytes);
+    Ok(hasher.finalize().to_hex().to_string())
+  }
+
+  async fn make_digest_file<D: Digest, P: AsRef<Path>>(
+    &self,
+    path: P,
+  ) -> Result<String, std::io::Error>
   where
     Output<D>: LowerHex,
   {
@@ -76,7 +122,7 @@ impl Hashery {
   }
 
   #[cfg(feature = "blake3")]
-  async fn make_blake3<P: AsRef<Path>>(&self, path: P) -> Result<String, std::io::Error> {
+  async fn make_blake3_file<P: AsRef<Path>>(&self, path: P) -> Result<String, std::io::Error> {
     use tokio::io::AsyncReadExt;
 
     let file = tokio::fs::File::open(path).await?;
@@ -108,6 +154,16 @@ mod tests {
     let hash = hashery.digest("fixtures/demo1.txt").await.unwrap();
     println!("{:?}", hash);
     assert!(!hash.is_empty());
+  }
+
+  // 测试 md5 字符串
+  #[cfg(feature = "md5")]
+  #[tokio::test]
+  async fn test_md5_string() {
+    let hashery = Hashery::builder().algorithm(Algorithm::MD5).build();
+    let hash = hashery.digest_string("hello").unwrap();
+    println!("{:?}", hash);
+    assert_eq!("5d41402abc4b2a76b9719d911017c592", hash);
   }
 
   // 测试 SHA3 feature（默认未开启）
