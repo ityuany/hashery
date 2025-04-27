@@ -54,7 +54,7 @@ impl Hashery {
     Ok(hash)
   }
 
-  pub fn digest_string(&self, s: &str) -> Result<String, std::io::Error> {
+  pub fn digest_str(&self, s: &str) -> Result<String, std::io::Error> {
     self.digest_bytes(s.as_bytes())
   }
 
@@ -161,7 +161,7 @@ mod tests {
   #[tokio::test]
   async fn test_md5_string() {
     let hashery = Hashery::builder().algorithm(Algorithm::MD5).build();
-    let hash = hashery.digest_string("hello").unwrap();
+    let hash = hashery.digest_str("hello").unwrap();
     println!("{:?}", hash);
     assert_eq!("5d41402abc4b2a76b9719d911017c592", hash);
   }

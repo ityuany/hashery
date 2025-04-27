@@ -8,4 +8,5 @@
   "cSpell.words": [
     "Hashery"
   ],
+  "rust-analyzer.cargo.features": ["all"]
 }
